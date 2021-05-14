@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    // ****************동기 콜백
+    function printImmediately(print) {
+        print()
+    }
+
+    printImmediately(() => {
+        console.log(3)
+    })
+
+    // *******************비동기 콜백
+    function printWithDelay(print, timeout) {
+        setTimeout(print, timeout)
+    }
+
+    printWithDelay(() => {
+        console.log(1)
+    }, 2000)
+
+    // ********************콜백 지옥
+    // class UserStorage {
+    //     loginUser(id, password, onSuccess, onError) {
+    //         setTimeout(() => {
+    //             if((id === 'ellie' && password === 'dream') || (id === 'coder' && password === 'academy')) {
+    //                 onSuccess(id)
+    //             } else {
+    //                 onError(new Error('not found'))
+    //             }
+    //         }, 2000)
+    //     }
+    //
+    //     getRoles(user, onSuccess, onError) {
+    //         setTimeout(() => {
+    //             if(user === 'ellie') {
+    //                 onSuccess({ name: 'ellie', role: 'admin' })
+    //             } else {
+    //                 onError(new Error('no access'))
+    //             }
+    //         }, 1000)
+    //     }
+    // }
+    //
+    // const userStorage = new UserStorage()
+    // const id = prompt('enter your id')
+    // const password = prompt('enter your password')
+    // userStorage.loginUser(id, password, (user) => {
+    //     userStorage.getRoles(user, (userWithRole) => {
+    //         alert(`Hello ${userWithRole.name}, you have a ${userWithRole.role} role`)
+    //     }, (error) => {
+    //         console.log(error)
+    //     })
+    // }, (error) => {
+    //     console.log(error)
+    // })
+
+
+    // *********************promise
+    //따로 promise()를 실행하지 않아도 Promise 생성하는 순간 바로 실행됨
+    const promise = new Promise(((resolve, reject) => {
+        console.log('asdf')
+        setTimeout(() => {
+            // resolve('ellie')
+            reject(new Error('no network'))
+        }, 2000)
+    }))
+
+    promise.then((value) => {
+        // 프로미스가 리턴됨
+        console.log(value)
+    }).catch((error) => {
+        console.log(error)
+    }).finally(() => {
+        console.log('finally')
+    })
+
+    // *********************promise chaining
+    const fetchNumber = new Promise(((resolve, reject) => {
+        setTimeout(() => {
+            resolve(1)
+        }, 1000)
+    }))
+
+    fetchNumber
+        .then(num => num * 2)
+        .then(num => num * 3)
+        .then((num) => {
+        return new Promise(((resolve, reject) => {
+            setTimeout(() => {
+                resolve(num - 1)
+            }, 1000)
+        }))
+    }).then((num) => {
+        console.log(num)
+    })
+
+
+    // ********************* Error Handling
+    const getHeart = () =>
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve('❤')
+            }, 1000)
+        })
+
+    const getLetter = heart =>
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(`${heart} => 💌`)
+                // reject(new Error('error!'))
+            }, 1000)
+
+        })
+
+    const ok = letter =>
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(`${letter} => ⭕`)
+            }, 1000)
+        })
+
+
+    getHeart()
+        .then(getLetter)
+        // .catch(error => '💢')
+        .then(ok)
+        .then(console.log)
+        .catch(console.log)
+
+    // getHeart()
+    //     .then(heart => getLetter(heart))
+    //     .then(letter => ok(letter))
+    //     .then(ok => console.log(ok))
+
+
+
+    // **************** callback-to-promise
+    class UserStorage {
+        loginUser(id, password) {
+            return new Promise(((resolve, reject) => {
+                setTimeout(() => {
+                    if((id === 'ellie' && password === 'dream') || (id === 'coder' && password === 'academy')) {
+                        resolve(id)
+                    } else {
+                        reject(new Error('not found'))
+                    }
+                }, 2000)
+            }))
+        }
+
+        getRoles(user) {
+            return new Promise(((resolve, reject) => {
+                setTimeout(() => {
+                    if(user === 'ellie') {
+                        resolve({ name: 'ellie', role: 'admin' })
+                    } else {
+                        reject(new Error('no access'))
+                    }
+                }, 1000)
+            }))
+        }
+    }
+
+    const userStorage = new UserStorage()
+    const id = prompt('enter your id')
+    const password = prompt('enter your password')
+
+    userStorage.loginUser(id, password)
+    .then(userStorage.getRoles)
+    .then(user => alert(
+        `Hello ${user.name}, you have a ${user.role} role`
+    ))
+    .catch(console.log)
+
+</script>
+
+</body>
+</html>
