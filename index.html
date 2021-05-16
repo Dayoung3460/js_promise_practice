@@ -141,43 +141,105 @@
 
 
     // **************** callback-to-promise
-    class UserStorage {
-        loginUser(id, password) {
-            return new Promise(((resolve, reject) => {
-                setTimeout(() => {
-                    if((id === 'ellie' && password === 'dream') || (id === 'coder' && password === 'academy')) {
-                        resolve(id)
-                    } else {
-                        reject(new Error('not found'))
-                    }
-                }, 2000)
-            }))
-        }
+    // class UserStorage {
+    //     loginUser(id, password) {
+    //         return new Promise(((resolve, reject) => {
+    //             setTimeout(() => {
+    //                 if((id === 'ellie' && password === 'dream') || (id === 'coder' && password === 'academy')) {
+    //                     resolve(id)
+    //                 } else {
+    //                     reject(new Error('not found'))
+    //                 }
+    //             }, 2000)
+    //         }))
+    //     }
+    //
+    //     getRoles(user) {
+    //         return new Promise(((resolve, reject) => {
+    //             setTimeout(() => {
+    //                 if(user === 'ellie') {
+    //                     resolve({ name: 'ellie', role: 'admin' })
+    //                 } else {
+    //                     reject(new Error('no access'))
+    //                 }
+    //             }, 1000)
+    //         }))
+    //     }
+    // }
+    //
+    // const userStorage = new UserStorage()
+    // const id = prompt('enter your id')
+    // const password = prompt('enter your password')
+    //
+    // userStorage.loginUser(id, password)
+    // .then(userStorage.getRoles)
+    // .then(user => alert(
+    //     `Hello ${user.name}, you have a ${user.role} role`
+    // ))
+    // .catch(console.log)
 
-        getRoles(user) {
-            return new Promise(((resolve, reject) => {
-                setTimeout(() => {
-                    if(user === 'ellie') {
-                        resolve({ name: 'ellie', role: 'admin' })
-                    } else {
-                        reject(new Error('no access'))
-                    }
-                }, 1000)
-            }))
-        }
+
+    // ************************ async / await
+    // 프로미스는 동기적을 비동기적으로 바꿔줌
+    // 프로미스 안에는 리졸브나 리젝트 둘 중 하나는 꼭 있어야함.
+    // 아니면 계속 팬딩 상태
+    // async도 프로미스가 하는 일을 해줌
+    async function fetchUser() {
+        return 'ellie'
     }
 
-    const userStorage = new UserStorage()
-    const id = prompt('enter your id')
-    const password = prompt('enter your password')
+    const user = fetchUser()
+    user.then(console.log)
+    console.log(user)
 
-    userStorage.loginUser(id, password)
-    .then(userStorage.getRoles)
-    .then(user => alert(
-        `Hello ${user.name}, you have a ${user.role} role`
-    ))
-    .catch(console.log)
+    function delay(ms) {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, ms)
+        })
+    }
 
+    async function getApple() {
+        await delay(1000)
+        return 'apple'
+    }
+
+    async function getBanana() {
+        await delay(1000)
+        return 'Banana'
+    }
+
+    async function pickFruits() {
+        // 병렬적으로 수행. 1초씩 동시에 수행됨. 그래스 2초 기다릴 필요 없지
+        // 그냥 프로미스에다가 await를 달아주면 순차적으로 await가 실행되어 2초 기달해야하지만 미리 프로미스를 수행 후 변수에 담아놓으면 병렬로 실행됨.
+        // 여기서는 사과 가지고 오는거랑 바나나 가지고 오는거라 상관없기 때문에 이렇게 하는게 효율적.
+        // 하지만 순차적으로 실행이 되어야 할 때는 이렇게 할 필요 ㄴㄴ
+        const applePromise = getApple() // 프로미스가 바로 호출됨. async로 프로미스. 1초 바로 ㄱㄱ
+        const bananaPromise = getBanana()// 프로미스가 바로 호출됨. 1초 바로 ㄱㄱ
+        const apple = await applePromise
+        const banana = await bananaPromise
+        return `${apple} + ${banana}` // 1초만에 boom
+    }
+
+    pickFruits().then(console.log)
+
+    // 위에처럼 해도 되지만 유용한 api가 있지.
+    // Promise.all()
+    // 괄호 안에 배열로 프로미스를 나열해주면 프로미스들 모두가 끝날 때 까지 기다려줌
+    // .then으로 나오는 값도 배열로 리턴됨
+    function pickAllFruits() {
+        return Promise.all([getApple(), getBanana()])
+        .then(fruits => fruits.join('+'))
+    }
+
+    pickAllFruits().then(console.log)
+
+    // Promise.race() 얘는 배열 속 프로미스들 중에 가장 빨리 값을 내는
+    // 얘만 리턴시킴
+    function pickOnlyOne() {
+        return Promise.race([getApple(), getBanana()])
+    }
+
+    pickOnlyOne().then(console.log)
 </script>
 
 </body>
